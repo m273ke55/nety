@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: N2r7pK!w3Yc0QzVt9LfR
+      POSTGRES_DB: dating_app
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d dating_app"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      adinokii_volk:
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://user:N2r7pK!w3Yc0QzVt9LfR:5432/dating_app
+      SECRET_KEY: hT3@xX1qM9e$R4vU2cG7zK8jL5bS0nF!
+    volumes:
+      - volk-images:/app/uploads/avatars/
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      adinokii_volk:
+
+  frontend:
+    build: ./front
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      adinokii_volk:
+
+volumes:
+  db_data:
+  volk-images:
+
+networks:
+  adinokii_volk:
